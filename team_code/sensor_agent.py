@@ -677,6 +677,16 @@ class SensorAgent(autonomous_agent.AutonomousAgent):
 
     control = carla.VehicleControl(steer=float(steer), throttle=float(throttle), brake=float(brake))
 
+    # Intended plan for this step, read by friction_ood/tick_logger.py. Ego frame (x forward, y right, meters).
+    self.last_plan = {'step': self.step, 'speed': float(gt_velocity)}
+    if self.config.inference_direct_controller and self.config.use_controller_input_prediction:
+      self.last_plan['path'] = np.asarray(pred_checkpoints).reshape(-1, 2).tolist()
+      self.last_plan['target_speed'] = float(pred_target_speed_scalar)
+      self.last_plan['target_speed_probs'] = pred_target_speed_ensemble.detach().cpu().numpy().tolist()
+    else:
+      self.last_plan['waypoints'] = self.pred_wp[0].detach().cpu().numpy().tolist()
+      self.last_plan['waypoint_dt'] = self.config.data_save_freq / self.config.carla_fps
+
     if self.IS_BENCH2DRIVE:
       # TODO doesn't seem to work
       metric_info = self.get_metric_info()

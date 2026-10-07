@@ -13,6 +13,7 @@ Provisional code to evaluate Autonomous Agents for the CARLA Autonomous Driving 
 from __future__ import print_function
 
 import traceback
+import json
 import argparse
 
 from argparse import RawTextHelpFormatter
@@ -414,6 +415,19 @@ class LeaderboardEvaluator(object):
             if args.record:
                 self.client.start_recorder("{}/{}_rep{}.log".format(args.record, config.name, config.repetition_index))
             self.manager.load_scenario(self.route_scenario, self.agent_instance, config.index, config.repetition_index)
+            if args.friction_mode != 'none':
+                from friction_ood.friction import FrictionEnforcer
+                self.manager.friction = FrictionEnforcer(self.world, self.route_scenario.ego_vehicles[0],
+                                                         args.friction_mode, args.friction_scale)
+                self.manager.friction.info['route'] = route_name
+                print(f"\033[1m> Friction intervention: {self.manager.friction.info}\033[0m", flush=True)
+            if args.tick_log_dir:
+                from friction_ood.tick_logger import TickLogger
+                os.makedirs(args.tick_log_dir, exist_ok=True)
+                self.manager.tick_logger = TickLogger(
+                    os.path.join(args.tick_log_dir, save_name + '.jsonl.gz'),
+                    meta={'route': route_name, 'town': town_name, 'scenario': scenario_name,
+                          'friction_mode': args.friction_mode, 'friction_scale': args.friction_scale})
             self.manager.tick_count = 0
             self.manager.run_scenario()
 
@@ -439,6 +453,14 @@ class LeaderboardEvaluator(object):
         # Stop the scenario
         try:
             print("\033[1m> Stopping the route\033[0m", flush=True)
+            if self.manager.tick_logger is not None:
+                self.manager.tick_logger.close()
+                self.manager.tick_logger = None
+            if self.manager.friction is not None:
+                with open(os.path.splitext(args.checkpoint)[0] + '_friction.jsonl', 'a') as f:
+                    f.write(json.dumps(self.manager.friction.info) + '\n')
+                print(f"\033[1m> Friction re-applied at ticks: {self.manager.friction.info['reapply_ticks']}\033[0m", flush=True)
+                self.manager.friction = None
             self.manager.stop_scenario()
             self._register_statistics(config.index, entry_status, crash_message)
 
@@ -553,6 +575,12 @@ def main():
     parser.add_argument("--debug-checkpoint", type=str, default='./live_results.txt',
                         help="Path to checkpoint used for saving live results")
     parser.add_argument("--gpu-rank", type=int, default=0)
+    parser.add_argument('--friction-mode', type=str, default='none', choices=['none', 'ego', 'road'],
+                        help='Counterfactual friction intervention (see friction_ood/friction.py)')
+    parser.add_argument('--friction-scale', type=float, default=1.0,
+                        help='Tire friction scale relative to the vehicle default (1.0 = dry)')
+    parser.add_argument('--tick-log-dir', type=str, default='',
+                        help='If set, write a per-tick ego state / control / plan log per route here')
     arguments = parser.parse_args()
 
     statistics_manager = StatisticsManager(arguments.checkpoint, arguments.debug_checkpoint)

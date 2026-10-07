@@ -9,11 +9,19 @@
 #SBATCH --error=/mnt/lustre/work/geiger/bjaeger25/garage_2_cleanup/results/logs/b2d_009_%a_%A.err   # File to which STDERR will be written
 #SBATCH --partition=2080-galvani
 
-export CARLA_ROOT=/mnt/lustre/work/geiger/bjaeger25/CARLA_0_9_15
-export WORK_DIR=/mnt/lustre/work/geiger/bjaeger25/garage_2_cleanup/Bench2Drive
+# export CARLA_ROOT=/mnt/lustre/work/geiger/bjaeger25/CARLA_0_9_15
+# export WORK_DIR=/mnt/lustre/work/geiger/bjaeger25/garage_2_cleanup/Bench2Drive
+# export SCENARIO_RUNNER_ROOT=${WORK_DIR}/scenario_runner
+# export LEADERBOARD_ROOT=${WORK_DIR}/leaderboard
+# export PYTHONPATH=$PYTHONPATH:/mnt/lustre/work/geiger/bjaeger25/garage_2_cleanup/team_code
+# export PYTHONPATH="${CARLA_ROOT}/PythonAPI/carla/":"${SCENARIO_RUNNER_ROOT}":"${LEADERBOARD_ROOT}":${PYTHONPATH}
+
+
+export CARLA_ROOT=/home/imrl/Documents/Frank_thesis/carla_garage/carla
+export WORK_DIR=/home/imrl/Documents/Frank_thesis/carla_garage
+export PYTHONPATH=$PYTHONPATH:${CARLA_ROOT}/PythonAPI/carla
 export SCENARIO_RUNNER_ROOT=${WORK_DIR}/scenario_runner
 export LEADERBOARD_ROOT=${WORK_DIR}/leaderboard
-export PYTHONPATH=$PYTHONPATH:/mnt/lustre/work/geiger/bjaeger25/garage_2_cleanup/team_code
 export PYTHONPATH="${CARLA_ROOT}/PythonAPI/carla/":"${SCENARIO_RUNNER_ROOT}":"${LEADERBOARD_ROOT}":${PYTHONPATH}
 
 #!/bin/bash

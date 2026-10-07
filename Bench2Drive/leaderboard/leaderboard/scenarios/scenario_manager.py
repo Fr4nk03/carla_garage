@@ -75,6 +75,8 @@ class ScenarioManager(object):
         self._statistics_manager = statistics_manager
 
         self.tick_count = 0
+        self.tick_logger = None  # friction_ood.tick_logger.TickLogger, set by the evaluator
+        self.friction = None  # friction_ood.friction.FrictionEnforcer, set by the evaluator
 
         # Use the callback_id inside the signal handler to allow external interrupts
         signal.signal(signal.SIGINT, self.signal_handler)
@@ -197,6 +199,11 @@ class ScenarioManager(object):
 
             self._watchdog.resume()
             self.ego_vehicles[0].apply_control(ego_action)
+            if self.friction is not None:
+                self.friction.enforce(self.tick_count)
+            if self.tick_logger is not None:
+                self.tick_logger.log(self.tick_count, GameTime.get_time(), self.ego_vehicles[0], ego_action,
+                                     getattr(self._agent_wrapper._agent, 'last_plan', None))
 
             # Tick scenario. Add the ego control to the blackboard in case some behaviors want to change it
             py_trees.blackboard.Blackboard().set("AV_control", ego_action, overwrite=True)

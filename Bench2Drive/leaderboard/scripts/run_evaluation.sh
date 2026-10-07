@@ -5,6 +5,10 @@ export PYTHONPATH=$PYTHONPATH:${CARLA_ROOT}/PythonAPI/carla
 export PYTHONPATH=$PYTHONPATH:${WORK_DIR}/leaderboard
 export PYTHONPATH=$PYTHONPATH:${WORK_DIR}/scenario_runner
 export SCENARIO_RUNNER_ROOT=${WORK_DIR}/scenario_runner
+export PYTHONPATH=$PYTHONPATH:${WORK_DIR}/.. # friction_ood
+export FRICTION_MODE=${FRICTION_MODE:-none}
+export FRICTION_SCALE=${FRICTION_SCALE:-1.0}
+export TICK_LOG_DIR=${TICK_LOG_DIR:-}
 
 export LEADERBOARD_ROOT=${WORK_DIR}/leaderboard
 export CHALLENGE_TRACK_CODENAME=SENSORS
@@ -24,6 +28,6 @@ export TEAM_CONFIG=$6
 export CHECKPOINT_ENDPOINT=$7
 export SAVE_PATH=$8
 
-echo -e "CUDA_VISIBLE_DEVICES=${GPU_RANK} python ${LEADERBOARD_ROOT}/leaderboard/leaderboard_evaluator.py --routes=${ROUTES} --repetitions=${REPETITIONS} --track=${CHALLENGE_TRACK_CODENAME} --checkpoint=${CHECKPOINT_ENDPOINT} --agent=${TEAM_AGENT} --agent-config=${TEAM_CONFIG} --debug=${DEBUG_CHALLENGE} --record=${RECORD_PATH} --resume=${RESUME} --port=${PORT} --traffic-manager-port=${TM_PORT} --gpu-rank=${GPU_RANK}"
+echo -e "CUDA_VISIBLE_DEVICES=${GPU_RANK} python ${LEADERBOARD_ROOT}/leaderboard/leaderboard_evaluator.py --routes=${ROUTES} --repetitions=${REPETITIONS} --track=${CHALLENGE_TRACK_CODENAME} --checkpoint=${CHECKPOINT_ENDPOINT} --agent=${TEAM_AGENT} --agent-config=${TEAM_CONFIG} --debug=${DEBUG_CHALLENGE} --record=${RECORD_PATH} --resume=${RESUME} --port=${PORT} --traffic-manager-port=${TM_PORT} --gpu-rank=${GPU_RANK} --friction-mode=${FRICTION_MODE} --friction-scale=${FRICTION_SCALE} --tick-log-dir=${TICK_LOG_DIR}"
 
-CUDA_VISIBLE_DEVICES=${GPU_RANK} python "${LEADERBOARD_ROOT}"/leaderboard/leaderboard_evaluator.py --routes="${ROUTES}" --repetitions=${REPETITIONS} --track=${CHALLENGE_TRACK_CODENAME} --checkpoint="${CHECKPOINT_ENDPOINT}" --agent="${TEAM_AGENT}" --agent-config="${TEAM_CONFIG}" --debug=${DEBUG_CHALLENGE} --record="${RECORD_PATH}" --resume=${RESUME} --port="${PORT}" --traffic-manager-port="${TM_PORT}" --gpu-rank="${GPU_RANK}" \
+CUDA_VISIBLE_DEVICES=${GPU_RANK} python "${LEADERBOARD_ROOT}"/leaderboard/leaderboard_evaluator.py --routes="${ROUTES}" --repetitions=${REPETITIONS} --track=${CHALLENGE_TRACK_CODENAME} --checkpoint="${CHECKPOINT_ENDPOINT}" --agent="${TEAM_AGENT}" --agent-config="${TEAM_CONFIG}" --debug=${DEBUG_CHALLENGE} --record="${RECORD_PATH}" --resume=${RESUME} --port="${PORT}" --traffic-manager-port="${TM_PORT}" --gpu-rank="${GPU_RANK}" --friction-mode="${FRICTION_MODE}" --friction-scale="${FRICTION_SCALE}" --tick-log-dir="${TICK_LOG_DIR}" \
