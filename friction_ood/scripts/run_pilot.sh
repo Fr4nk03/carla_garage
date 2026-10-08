@@ -1,6 +1,7 @@
 #!/bin/bash
 # Pilot: TF++ on friction_ood/routes/pilot10.xml, dry vs. low friction (ego mode), one GPU, sequential.
-# Usage: bash friction_ood/scripts/run_pilot.sh [scale ...]   (default: 1.0 0.1)
+# Usage: [SEED=k] bash friction_ood/scripts/run_pilot.sh [scale ...]   (default: 1.0 0.1, SEED=0)
+# SEED is the repetition index and the traffic manager seed; dry and low friction of one repetition share it.
 # Re-running resumes from the checkpoint json (RESUME=True in run_evaluation.sh).
 set -e
 
@@ -8,8 +9,8 @@ PROJECT_ROOT=${PROJECT_ROOT:-/home/imrl/Documents/Frank_thesis}
 GARAGE=${PROJECT_ROOT}/carla_garage
 
 export CARLA_ROOT=${GARAGE}/carla
-# Expose only the NVIDIA Vulkan driver to CARLA. Otherwise -graphicsadapter=0 picks the AMD GPU on this machine
-# (Vulkan and CUDA order the GPUs differently) and all sensor rendering runs there.
+# Expose only the NVIDIA Vulkan driver to CARLA. On machines with a second (non-NVIDIA) GPU, -graphicsadapter=0
+# can pick that GPU instead (Vulkan and CUDA order GPUs differently) and all sensor rendering runs there.
 export VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json
 export WORK_DIR=${GARAGE}/Bench2Drive
 export PYTHONPATH="${CARLA_ROOT}/PythonAPI/carla/":"${WORK_DIR}/scenario_runner":"${WORK_DIR}/leaderboard":"${GARAGE}/team_code":"${GARAGE}":${PYTHONPATH}
@@ -23,12 +24,14 @@ GPU_RANK=0
 PORT=30000
 TM_PORT=50000
 export FRICTION_MODE=ego
+SEED=${SEED:-0}
+export TM_SEED=${SEED}
 
 SCALES=("$@")
 [ ${#SCALES[@]} -eq 0 ] && SCALES=(1.0 0.1)
 
 for SCALE in "${SCALES[@]}"; do
-  OUT=${PROJECT_ROOT}/results/pilot/tfpp/${FRICTION_MODE}_mu${SCALE}/seed0
+  OUT=${PROJECT_ROOT}/results/pilot/tfpp/${FRICTION_MODE}_mu${SCALE}/seed${SEED}
   mkdir -p "${OUT}"
   export FRICTION_SCALE=${SCALE}
   export TICK_LOG_DIR=${OUT}/ticks

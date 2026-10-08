@@ -64,11 +64,14 @@ class FrictionEnforcer:
   """
   Applies the intervention and keeps the ego's tire friction at its target for the whole route.
 
-  In the leaderboard, the ego's physics control is reset to the default during the first scenario ticks
-  (measured: tire_friction 0.35 at tick 1, back to 3.5 at tick 2 and afterwards), so a one-shot
-  apply_physics_control does not hold. enforce() is called every tick: it reads the wheels back and re-applies
-  when they differ from the target. A read in the same tick as an apply returns stale values, so the check
-  is skipped on the tick right after an apply. Every re-apply tick is recorded in info['reapply_ticks'].
+  In the leaderboard, the ego's tire friction reverts to the default during the route: at tick 2 and, on some
+  routes, repeatedly later (measured on route 3080: read-back 3.5 for ticks 200-279 while braking at 6.2 m/s^2
+  instead of 2.9, i.e. real dry grip). enforce() is called every tick, reads the wheels back and re-applies when
+  they differ from the target. apply_physics_control rebuilds the vehicle physics and zeroes its velocity
+  (measured: 12.5 -> 0.01 m/s in one tick), so the linear and angular velocity are saved before and restored in
+  the same tick (measured: 13.88 -> 13.74 m/s, braking afterwards at 2.70 m/s^2 as calibrated).
+  A read in the same tick as an apply returns stale values, so the tick right after an apply is skipped.
+  Every re-apply tick is recorded in info['reapply_ticks'].
   """
 
   def __init__(self, world, ego, mode, scale):
@@ -89,9 +92,12 @@ class FrictionEnforcer:
     wheels = physics.wheels
     if all(abs(w.tire_friction - t) < 1e-3 for w, t in zip(wheels, self.target)):
       return
+    velocity, angular_velocity = self.ego.get_velocity(), self.ego.get_angular_velocity()
     for w, t in zip(wheels, self.target):
       w.tire_friction = t
     physics.wheels = wheels
     self.ego.apply_physics_control(physics)
+    self.ego.set_target_velocity(velocity)
+    self.ego.set_target_angular_velocity(angular_velocity)
     self._last_apply_tick = tick
     self.info['reapply_ticks'].append(tick)
