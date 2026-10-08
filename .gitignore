@@ -213,3 +213,7 @@ cython_debug/
 
 # Carla
 /carla
+
+# Bench2Drive Zoo and data
+/Bench2Drive/Bench2DriveZoo
+/Bench2Drive/data
