@@ -1,6 +1,8 @@
 #!/bin/bash
 # Pilot: TF++ on friction_ood/routes/pilot10.xml, dry vs. low friction (ego mode), one GPU, sequential.
-# Usage: [SEED=k] bash friction_ood/scripts/run_pilot.sh [scale ...]   (default: 1.0 0.1, SEED=0)
+# Usage: [SEED=k] [ROUTES=file.xml] [EXP=name] [RECORD=1] bash friction_ood/scripts/run_pilot.sh [scale ...]
+#   defaults: scales 1.0 0.1, SEED=0, ROUTES=friction_ood/routes/pilot10.xml, EXP=pilot (results/<EXP>/tfpp/...)
+#   RECORD=1 also writes CARLA recorder logs to <out>/recording/ (replay with friction_ood/scripts/replay.sh)
 # SEED is the repetition index and the traffic manager seed; dry and low friction of one repetition share it.
 # Re-running resumes from the checkpoint json (RESUME=True in run_evaluation.sh).
 set -e
@@ -12,10 +14,14 @@ export CARLA_ROOT=${GARAGE}/carla
 # Expose only the NVIDIA Vulkan driver to CARLA. On machines with a second (non-NVIDIA) GPU, -graphicsadapter=0
 # can pick that GPU instead (Vulkan and CUDA order GPUs differently) and all sensor rendering runs there.
 export VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json
+# TF++ builds its backbones with timm pretrained=True, which contacts huggingface.co (retries ~25 s when offline).
+# The ImageNet weights are overwritten by the TF++ checkpoint anyway, so use the local cache only.
+export HF_HUB_OFFLINE=1
 export WORK_DIR=${GARAGE}/Bench2Drive
 export PYTHONPATH="${CARLA_ROOT}/PythonAPI/carla/":"${WORK_DIR}/scenario_runner":"${WORK_DIR}/leaderboard":"${GARAGE}/team_code":"${GARAGE}":${PYTHONPATH}
 
-ROUTES=${GARAGE}/friction_ood/routes/pilot10.xml
+ROUTES=${ROUTES:-${GARAGE}/friction_ood/routes/pilot10.xml}
+EXP=${EXP:-pilot}
 TEAM_AGENT=${GARAGE}/team_code/sensor_agent.py
 TEAM_CONFIG=${PROJECT_ROOT}/weights/tfpp/pretrained_models/all_towns
 IS_BENCH2DRIVE=True
@@ -31,8 +37,9 @@ SCALES=("$@")
 [ ${#SCALES[@]} -eq 0 ] && SCALES=(1.0 0.1)
 
 for SCALE in "${SCALES[@]}"; do
-  OUT=${PROJECT_ROOT}/results/pilot/tfpp/${FRICTION_MODE}_mu${SCALE}/seed${SEED}
+  OUT=${PROJECT_ROOT}/results/${EXP}/tfpp/${FRICTION_MODE}_mu${SCALE}/seed${SEED}
   mkdir -p "${OUT}"
+  if [ "${RECORD:-0}" = 1 ]; then mkdir -p "${OUT}/recording"; export RECORD_PATH=${OUT}/recording; else export RECORD_PATH=; fi
   export FRICTION_SCALE=${SCALE}
   export TICK_LOG_DIR=${OUT}/ticks
   echo "=== TF++ pilot: mode=${FRICTION_MODE} scale=${SCALE} -> ${OUT}"
