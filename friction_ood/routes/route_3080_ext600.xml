@@ -1,0 +1,42 @@
+<routes><route id="3080" road_id="388" town="Town12">
+         <waypoints>
+            <position x="1334.3" y="3078.0" z="363.4" /><position x="1329.3" y="3078.0" z="363.5" /><position x="1324.3" y="3078.0" z="363.7" /><position x="1319.3" y="3078.0" z="363.8" /><position x="1314.3" y="3078.1" z="363.9" /><position x="1309.3" y="3078.1" z="364.0" /><position x="1304.3" y="3078.1" z="364.1" /><position x="1299.3" y="3078.1" z="364.3" /><position x="1294.3" y="3078.1" z="364.4" /><position x="1289.3" y="3078.1" z="364.6" /><position x="1284.3" y="3078.1" z="364.7" /><position x="1279.3" y="3078.1" z="364.8" /><position x="1274.3" y="3078.1" z="365.0" /><position x="1269.3" y="3078.1" z="365.1" /><position x="1264.3" y="3078.1" z="365.3" /><position x="1259.3" y="3078.1" z="365.4" /><position x="1254.3" y="3078.1" z="365.5" /><position x="1249.3" y="3078.1" z="365.5" /><position x="1244.3" y="3078.1" z="365.6" /><position x="1239.3" y="3078.1" z="365.6" /><position x="1234.3" y="3078.1" z="365.7" /><position x="1229.3" y="3078.1" z="365.7" /><position x="1224.3" y="3078.2" z="365.7" /><position x="1219.3" y="3078.2" z="365.7" /><position x="1214.3" y="3078.2" z="365.7" /><position x="1209.3" y="3078.2" z="365.7" /><position x="1204.3" y="3078.2" z="365.7" /><position x="1199.3" y="3078.2" z="365.7" /><position x="1194.3" y="3078.2" z="365.7" /><position x="1189.3" y="3078.2" z="365.7" /><position x="1184.3" y="3078.2" z="365.6" /><position x="1179.3" y="3078.2" z="365.6" /><position x="1174.3" y="3078.2" z="365.5" /><position x="1169.3" y="3078.2" z="365.5" /><position x="1164.3" y="3078.2" z="365.4" /><position x="1159.3" y="3078.2" z="365.4" /><position x="1154.3" y="3078.2" z="365.3" /><position x="1149.3" y="3078.2" z="365.3" /><position x="1144.3" y="3078.2" z="365.2" /><position x="1139.3" y="3078.2" z="365.2" /><position x="1134.3" y="3078.3" z="365.1" /><position x="1054.3" y="3078.3" z="363.9" /><position x="1049.3" y="3078.3" z="363.7" /><position x="1044.3" y="3078.4" z="363.6" /><position x="1039.3" y="3078.4" z="363.5" /><position x="1034.3" y="3078.4" z="363.4" /><position x="1029.3" y="3078.4" z="363.2" /><position x="1024.3" y="3078.4" z="363.1" /><position x="1019.3" y="3078.4" z="363.0" /><position x="1014.3" y="3078.4" z="362.9" /><position x="1009.3" y="3078.4" z="362.8" /><position x="1004.3" y="3078.4" z="362.8" /><position x="999.3" y="3078.4" z="362.7" /><position x="994.3" y="3078.4" z="362.7" /><position x="989.3" y="3078.4" z="362.7" /><position x="984.3" y="3078.4" z="362.7" /><position x="979.3" y="3078.4" z="362.7" /><position x="974.3" y="3078.4" z="362.7" /><position x="969.3" y="3078.4" z="362.7" /><position x="964.3" y="3078.4" z="362.7" /><position x="959.3" y="3078.4" z="362.7" /><position x="954.3" y="3078.5" z="362.7" /><position x="949.3" y="3078.5" z="362.7" /><position x="944.3" y="3078.5" z="362.8" /><position x="939.3" y="3078.5" z="362.8" /><position x="934.3" y="3078.5" z="362.9" /><position x="819.3" y="3078.6" z="361.6" /><position x="814.3" y="3078.6" z="361.5" /><position x="809.3" y="3078.6" z="361.5" /><position x="804.3" y="3078.6" z="361.5" /><position x="799.3" y="3078.6" z="361.5" /><position x="794.3" y="3078.6" z="361.5" /><position x="789.3" y="3078.6" z="361.5" /><position x="784.3" y="3078.6" z="361.6" /><position x="779.3" y="3078.6" z="361.6" /><position x="774.3" y="3078.7" z="361.7" /><position x="769.3" y="3078.7" z="361.7" /><position x="764.3" y="3078.7" z="361.7" /><position x="759.3" y="3078.7" z="361.8" /><position x="754.3" y="3078.7" z="361.8" /><position x="749.3" y="3078.7" z="361.8" /><position x="744.3" y="3078.7" z="361.8" /><position x="739.3" y="3078.7" z="361.8" /><position x="734.3" y="3078.7" z="361.8" />
+            <position x="732.3" y="3078.7" z="361.8" />
+            <position x="730.3" y="3078.7" z="361.8" />
+            <position x="728.3" y="3078.7" z="361.8" />
+            <position x="726.3" y="3078.7" z="361.8" />
+            <position x="724.3" y="3078.7" z="361.8" />
+            <position x="722.3" y="3078.7" z="361.8" />
+            <position x="720.3" y="3078.7" z="361.8" />
+            <position x="718.3" y="3078.7" z="361.8" />
+            <position x="716.3" y="3078.7" z="361.8" />
+            <position x="714.3" y="3078.7" z="361.8" />
+            <position x="712.3" y="3078.7" z="361.8" />
+            <position x="623.3" y="3078.8" z="361.8" />
+            <position x="621.3" y="3078.8" z="361.8" />
+            <position x="619.3" y="3078.8" z="361.8" />
+            <position x="617.3" y="3078.8" z="361.8" />
+            <position x="615.3" y="3078.8" z="361.8" />
+            <position x="613.3" y="3078.8" z="361.8" />
+            <position x="611.3" y="3078.8" z="361.8" />
+            <position x="609.3" y="3078.8" z="361.8" />
+            <position x="607.3" y="3078.8" z="361.8" />
+            <position x="605.3" y="3078.8" z="361.8" />
+            <position x="603.3" y="3078.8" z="361.8" />
+            <position x="601.3" y="3078.8" z="361.8" />
+            <position x="599.3" y="3078.9" z="361.8" />
+            <position x="597.3" y="3078.9" z="361.8" />
+         </waypoints>
+         <scenarios>
+            <scenario name="HighwayCutIn_1" type="HighwayCutIn">
+               <trigger_point x="727.3" y="3078.7" yaw="179.9" z="361.8" />
+               <other_actor_location x="704.2" y="3066.0" z="361.8" />
+               <end_location x="613.3" y="3078.8" z="361.8" />
+            </scenario>
+         </scenarios>
+         <weathers>
+            <weather cloudiness="5.0" fog_density="10.0" precipitation="0.0" precipitation_deposits="50.0" route_percentage="0" sun_altitude_angle="15.0" sun_azimuth_angle="-1.0" wetness="0.0" wind_intensity="10.0" />
+            <weather cloudiness="5.0" fog_density="10.0" precipitation="0.0" precipitation_deposits="50.0" route_percentage="100" sun_altitude_angle="15.0" sun_azimuth_angle="-1.0" wetness="0.0" wind_intensity="10.0" />
+         </weathers>
+      </route>
+      </routes>

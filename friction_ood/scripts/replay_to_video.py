@@ -34,7 +34,20 @@ def view_transforms(args):
   }
 
 
+def port_in_use(port):
+  with socket.socket() as s:
+    return s.connect_ex(('localhost', port)) == 0
+
+
 def start_server(port):
+  # A server from a previous export may still be shutting down on this port; connecting to it makes the client
+  # wait out its full timeout, so wait until the port is free before launching a new server.
+  for _ in range(60):
+    if not port_in_use(port):
+      break
+    time.sleep(2)
+  else:
+    raise RuntimeError(f'port {port} is still in use by another CARLA server')
   env = dict(os.environ, VK_ICD_FILENAMES='/usr/share/vulkan/icd.d/nvidia_icd.json')
   server = subprocess.Popen([os.path.join(GARAGE, 'carla', 'CarlaUE4.sh'), '-RenderOffScreen', '-nosound',
                              f'-carla-rpc-port={port}'], env=env, stdout=subprocess.DEVNULL,
@@ -149,6 +162,11 @@ def main():
     print(f'wrote {args.out} ({n_frames} frames, {n_frames * DT:.1f} s)', flush=True)
   finally:
     os.killpg(server.pid, 9)
+    server.wait()  # make sure the server is gone before a following export starts one on the same port
+    for _ in range(30):
+      if not port_in_use(args.port):
+        break
+      time.sleep(1)
 
 
 if __name__ == '__main__':

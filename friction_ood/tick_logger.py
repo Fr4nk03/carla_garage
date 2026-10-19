@@ -10,6 +10,8 @@ import gzip
 import json
 import math
 
+NEARBY_RADIUS = 60.0  # m, vehicles counted as nearby traffic
+
 
 def _dot(a, b):
   return a.x * b.x + a.y * b.y + a.z * b.z
@@ -46,6 +48,15 @@ class TickLogger:
     if tick in (1, 2, 20) or tick % 200 == 0:
       # Ground truth that the friction intervention is in effect (a same-tick read after applying is stale).
       row['tire_friction'] = [w.tire_friction for w in ego.get_physics_control().wheels]
+    if tick % 20 == 0:
+      # Traffic context, once per second: the speed limit CARLA reports for the ego (the background traffic uses it
+      # as its speed reference) and the speeds of vehicles within NEARBY_RADIUS.
+      row['ego_speed_limit'] = ego.get_speed_limit()  # km/h
+      nearby = []
+      for actor in ego.get_world().get_actors().filter('vehicle.*'):
+        if actor.id != ego.id and actor.get_location().distance(tf.location) < NEARBY_RADIUS:
+          nearby.append(round(actor.get_velocity().length() * 3.6, 1))  # km/h
+      row['nearby_speeds'] = nearby
     if plan is not None and plan.get('step') != self._last_plan_step:
       row['plan'] = plan
       self._last_plan_step = plan.get('step')

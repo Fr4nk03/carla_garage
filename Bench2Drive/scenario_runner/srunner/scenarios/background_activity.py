@@ -9,6 +9,7 @@ Scenario spawning elements to make the town dynamic and interesting
 """
 
 from collections import OrderedDict
+import os
 import py_trees
 
 import carla
@@ -18,6 +19,31 @@ from agents.navigation.local_planner import RoadOption
 from srunner.scenariomanager.carla_data_provider import CarlaDataProvider
 from srunner.scenariomanager.scenarioatomics.atomic_behaviors import AtomicBehavior
 from srunner.tools.scenario_helper import get_same_dir_lanes, get_opposite_dir_lanes
+
+# friction_ood (opt-in, defaults reproduce the original behaviour):
+#   BA_SPEED_SOURCE=ego  speed reference = ego.get_speed_limit(), which CARLA only updates when the ego passes a
+#                        speed sign and which starts at 30 km/h (original)
+#   BA_SPEED_SOURCE=map  speed reference = posted limit of the map at the ego (PDM-Lite speed-limit maps)
+#   BA_MAX_SPEED=90      hard cap on background traffic speed in km/h (original: 90)
+BA_SPEED_SOURCE = os.environ.get('BA_SPEED_SOURCE', 'ego')
+BA_MAX_SPEED = float(os.environ.get('BA_MAX_SPEED', '90'))
+BA_SPEED_LIMIT_DIR = os.environ.get(
+    'BA_SPEED_LIMIT_DIR',
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), *(['..'] * 4), 'team_code', 'speed_limits'))
+
+
+class MapSpeedLimit(object):
+    """Posted speed limit (km/h) at a location, from the PDM-Lite per-town speed-limit maps."""
+
+    def __init__(self, town):
+        import numpy as np
+        from scipy.spatial import cKDTree
+        data = np.load(os.path.join(BA_SPEED_LIMIT_DIR, '%s_speed_limits.npy' % town), allow_pickle=True).item()
+        self._tree = cKDTree(data['locations'][:, :2])
+        self._limits = data['speed_limits']
+
+    def __call__(self, location):
+        return float(self._limits[self._tree.query([location.x, location.y])[1]])
 
 JUNCTION_ENTRY = 'entry'
 JUNCTION_MIDDLE = 'middle'
@@ -190,6 +216,10 @@ class BackgroundBehavior(AtomicBehavior):
         self._route_index = 0
         self._get_route_data(route)
         self._actors_speed_perc = {}  # Dictionary actor - percentage
+        self._map_speed_limit = None
+        if BA_SPEED_SOURCE == 'map':
+            self._map_speed_limit = MapSpeedLimit(CarlaDataProvider.get_map().name.split('/')[-1])
+            print('BackgroundActivity: speed reference = map speed limit, cap %.0f km/h' % BA_MAX_SPEED, flush=True)
         self._all_actors = []
         self._lane_width_threshold = 2.25  # Used to stop some behaviors at narrow lanes to avoid problems [m]
 
@@ -2503,7 +2533,7 @@ class BackgroundBehavior(AtomicBehavior):
                 speed = min(speed, self._scenario_max_speed)
 
             # TODO: Fix very high speed traffic
-            speed = min(speed, 90)
+            speed = min(speed, BA_MAX_SPEED)
             self._tm.set_desired_speed(actor, speed)
 
     def _remove_actor_info(self, actor):
@@ -2590,7 +2620,10 @@ class BackgroundBehavior(AtomicBehavior):
 
         self._ego_wp = self._route[self._route_index]
         self._ego_key = get_lane_key(self._ego_wp)
-        self._ego_target_speed = self._ego_actor.get_speed_limit()
+        if self._map_speed_limit is not None:
+            self._ego_target_speed = self._map_speed_limit(self._ego_wp.transform.location)
+        else:
+            self._ego_target_speed = self._ego_actor.get_speed_limit()
 
         if self.debug:
             string = 'EGO_' + self._ego_state[0].upper()

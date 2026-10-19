@@ -28,7 +28,8 @@ IS_BENCH2DRIVE=True
 PLANNER_TYPE=traj
 GPU_RANK=0
 PORT=30000
-TM_PORT=50000
+# Outside the OS ephemeral port range (32768-60999 here), so no other program can be holding it
+TM_PORT=8000
 export FRICTION_MODE=ego
 SEED=${SEED:-0}
 export TM_SEED=${SEED}
@@ -39,6 +40,11 @@ SCALES=("$@")
 for SCALE in "${SCALES[@]}"; do
   OUT=${PROJECT_ROOT}/results/${EXP}/tfpp/${FRICTION_MODE}_mu${SCALE}/seed${SEED}
   mkdir -p "${OUT}"
+  # Refuse to mix route files in one output folder: results, logs and resume state would be overwritten.
+  if [ -f "${OUT}/routes_file.txt" ] && [ "$(cat "${OUT}/routes_file.txt")" != "${ROUTES}" ]; then
+    echo "ERROR: ${OUT} was created for $(cat "${OUT}/routes_file.txt"), not ${ROUTES}; use another EXP."; exit 1
+  fi
+  echo "${ROUTES}" > "${OUT}/routes_file.txt"
   if [ "${RECORD:-0}" = 1 ]; then mkdir -p "${OUT}/recording"; export RECORD_PATH=${OUT}/recording; else export RECORD_PATH=; fi
   export FRICTION_SCALE=${SCALE}
   export TICK_LOG_DIR=${OUT}/ticks

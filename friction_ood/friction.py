@@ -70,15 +70,24 @@ class FrictionEnforcer:
   they differ from the target. apply_physics_control rebuilds the vehicle physics and zeroes its velocity
   (measured: 12.5 -> 0.01 m/s in one tick), so the linear and angular velocity are saved before and restored in
   the same tick (measured: 13.88 -> 13.74 m/s, braking afterwards at 2.70 m/s^2 as calibrated).
+  The same-tick restore does not always take effect: in about half of the 0.1 runs at least one re-apply left
+  the car at exactly 0 m/s the next tick and frozen for ~10 ticks (e.g. route 3813: 64 km/h -> 0 at tick 278). So
+  for RESTORE_TICKS ticks after an apply, a speed drop of more than RESTORE_TOL m/s below the saved speed is
+  restored again; each such tick is recorded in info['restore_ticks'] as (tick, measured, saved) speeds in m/s.
   A read in the same tick as an apply returns stale values, so the tick right after an apply is skipped.
   Every re-apply tick is recorded in info['reapply_ticks'].
   """
+
+  RESTORE_TICKS = 5
+  RESTORE_TOL = 1.5  # m/s; more than any real braking within RESTORE_TICKS ticks at 20 Hz on low friction
 
   def __init__(self, world, ego, mode, scale):
     self.ego = ego
     self.info = apply_friction(world, ego, mode, scale)
     self.info['reapply_ticks'] = []
+    self.info['restore_ticks'] = []
     self.target = None
+    self._saved_velocity = None
     if mode != 'none' and scale != 1.0:
       base = self.info['base_tire_friction']
       base = base if isinstance(base, list) else [base] * len(ego.get_physics_control().wheels)
@@ -86,7 +95,16 @@ class FrictionEnforcer:
     self._last_apply_tick = 0
 
   def enforce(self, tick):
-    if self.target is None or tick <= self._last_apply_tick + 1:
+    if self.target is None:
+      return
+    if self._saved_velocity is not None and tick <= self._last_apply_tick + self.RESTORE_TICKS:
+      velocity, angular_velocity = self._saved_velocity
+      speed, saved = self.ego.get_velocity().length(), velocity.length()
+      if speed < saved - self.RESTORE_TOL:
+        self.ego.set_target_velocity(velocity)
+        self.ego.set_target_angular_velocity(angular_velocity)
+        self.info['restore_ticks'].append((tick, round(speed, 2), round(saved, 2)))
+    if tick <= self._last_apply_tick + 1:
       return
     physics = self.ego.get_physics_control()
     wheels = physics.wheels
@@ -99,5 +117,6 @@ class FrictionEnforcer:
     self.ego.apply_physics_control(physics)
     self.ego.set_target_velocity(velocity)
     self.ego.set_target_angular_velocity(angular_velocity)
+    self._saved_velocity = (velocity, angular_velocity)
     self._last_apply_tick = tick
     self.info['reapply_ticks'].append(tick)
